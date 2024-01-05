@@ -30,18 +30,26 @@ def login():
     
 #this links is for device 1 
 @app.route('/device1/<string:username>/<string:session>', methods=["GET", "POST"])
-def Dashoboard():
-    user = {
-        "username" : "Aman Singh",
-        "image":"static/images/amanSingh.jpg"
-    }
+def Dashoboard(username, session):
+    global logged_in
 
-    devices = [
-        {"Dashboard" : "device1",
-        "deviceID": "Device1"
+    if username in logged_in and (logged_in[username]['object'].session_id == session):
+        user = {
+            "username" : username,
+            "image":"/static/images/amanSingh.jpg",
+            "api": logged_in[username]["object"].api,
+            "session" : session
         }
-    ]
-    return render_template('device_dashboard.html', title='Dashobard', user=user, devices=devices)
+
+        devices = [
+            {"Dashboard" : "device1",
+            "deviceID": "Device1"
+            }
+        ]
+        return render_template('device_dashboard.html', title='Dashoboard', user=user, devices=devices)
+    
+    else:
+        return redirect('/login')
 
 
 #this link is for the main dashboard of the website
@@ -118,7 +126,7 @@ def profile(username, session):
 
         devices = [
             {"Dashboard" : "device1",
-            "deviceID": "ARMS12012"
+            "deviceID": "device1"
             }
         ]
         return render_template('profile.html', title='API-Settings', user=user, devices=devices)

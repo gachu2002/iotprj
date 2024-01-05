@@ -52,7 +52,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
     {% for device in devices %}
 
-    <!-- <a href="{{ device.Dashboard }}" class="w3-bar-item w3-button w3-padding"> <img src="/static/images/bio-sensor.svg"> {{ device.deviceID }}</a> -->
+    <a href="/device1/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding"> <img src="/static/images/bio-sensor.svg"> {{ device.deviceID }}</a>
     
     {% endfor %}
 
