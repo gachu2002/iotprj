@@ -1,0 +1,12 @@
+click
+colorama
+Flask
+itsdangerous
+Jinja2
+MarkupSafe
+mysql
+mysql-connector-python
+mysqlclient
+passlib
+protobuf
+Werkzeug
