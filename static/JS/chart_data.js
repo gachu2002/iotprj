@@ -152,4 +152,4 @@ function removeData(chart) {
 
 var couter = 0; 
 
-getdevice();
+// getdevice();
