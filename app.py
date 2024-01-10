@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, redirect, request
+from flask import Flask, render_template, jsonify, redirect, request, flash
 import json, database, base64
 from random import choice
 from datetime import datetime
@@ -6,7 +6,7 @@ import person
 import os, binascii
 
 app = Flask(__name__)
-
+app.config['SECRET_KEY'] = 'gfgfgghghgfhgfhgfhgfhfgghghghghghg'
 logged_in = {}
 api_loggers = {}
 mydb = database.db('root', 'Localhost', 'Love123bgbg@', 'ARMS')
@@ -27,9 +27,45 @@ def login():
             error = "invalid Username or Passowrd"
        
     return render_template('Login.html', error=error)
-    
+
+#register
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    error = ""
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if not username or not password:
+            error = "Username and password are required."
+        else:
+            new_user = person.user(username, password)
+            api_key = str(binascii.b2a_hex(os.urandom(15)));
+            try:
+                result = new_user.db.add_user(
+                    username,
+                    password,
+                    "",  
+                    "",
+                    "",
+                    "",
+                    api_key  
+                )
+
+                if result == "success":
+                    new_user.authenticated = True
+                    flash("Registration successful! Please log in.", "success")
+                    return redirect('/login')
+                else:
+                    flash("Error registering user.", "error")
+            except Exception as e:
+                flash(f"Error: {str(e)}", "error")
+
+    return render_template('register.html', error=error)   
+
 #this links is for device 1 
-@app.route('/device1/<string:username>/<string:session>', methods=["GET", "POST"])
+@app.route('/devices/<string:username>/<string:session>', methods=["GET", "POST"])
 def Dashoboard(username, session):
     global logged_in
 

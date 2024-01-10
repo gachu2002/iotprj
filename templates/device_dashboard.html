@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/static/css/main.css">
+<link rel="stylesheet" href="/static/css/util.css">
 
 <style>
 html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
@@ -49,11 +50,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-white w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
     <a href="/overview/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Overview</a>
 
-    {% for device in devices %}
-
-    <a href="/device1/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding w3-blue"> <img src="/static/images/bio-sensor.svg"> {{ device.deviceID }}</a>
-    
-    {% endfor %}
+    <a href="/devices/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding w3-blue"> <img src="/static/images/bio-sensor.svg"> Devices</a>
 
     <!-- <a href="#" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i>  Field device Controls</a> -->
     <a href="/apisettings/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  API settings</a>
@@ -117,40 +114,51 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </div>
   </div>
 
-<div class="w3-panel w3-padding-large">
-  <div class="w3-container w3-white w3-card w3-hover-shadow w3-half w3-section w3-round-large">
-    <h3>
-      Temperature
-    </h3> 
-    <div class="ct-chart ct-series-a ct-major-sixth"></div>
-    </div>
+  <!-- List of Devices -->
+  <div class = "w3-container w3-responsive">
+    <div class = "w3-panel w3-white">
+      <div>
+        <div class = "w3-panel w3-container">
+          <div class = "w3-left fs-30 w3-bold-large">Devices detail</div>
+          <div class="w3-right">
+            <div class="form-outline w3-round-xxlarge w3-border ">
+              <div class = "p-l-5 p-r-5 p-t-8 p-b-8 fs-17">
+                <button type="button" class="btn btn-primary w3-align-left m-l-5 m-r-5">
+                  <i class="fa fa-search"></i>
+                </button>
+                <input type="text" id="form1" onkeyup = "filterDevices()" class="form-control" placeholder = "Search"/>
+              </div>
+            </div>   
+          </div>
+        </div>
+        
+        <table class = "w3-table-all w3-card-4 w3-panel m-b-30">
+            <tr class = "w3-bold">
+              <th>#</th>
+              <th>Name</th>
+              <th>Type of Device</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
 
-    
-    <div class="w3-container w3-white w3-card w3-hover-shadow w3-half w3-section w3-round-large">
-      <h3>
-        Humidity
-      </h3> 
-    <div class="ct-chart ct-series-a ct-major-sixth"></div>
+            {% for device in devices %}
+            <tr>
+              <td>{{device.deviceID}}</td>
+              <td>{{device.deviceID}}</td>
+              <td>{{device.deviceID}}</td>
+              <td>{{device.deviceID}}</td>
+              <td>
+                
+              </td>
+            </tr>
+            {% endfor %}
+        </table>
+      </div>
     </div>
-    
-    <div class="w3-container w3-white w3-card w3-hover-shadow w3-half w3-section w3-round-large">
-      <h3>
-        Moisture
-      </h3> 
-    <div class="ct2-chart ct-series-b ct-major-sixth"></div>
-    </div>
-
-    <div class="w3-container w3-white w3-card w3-hover-shadow w3-half w3-section w3-round-large">
-      <h3>
-        Light Intensity
-      </h3> 
-    <div class="ct2-chart ct-series-b ct-major-sixth"></div>
-    </div>
-
-</div>
+  </div>
   
 
-  <div class="w3-panel w3-padding-16">
+  <!--<div class="w3-panel w3-padding-16">
     <div class="w3-row-padding w3-white w3-border-green w3-margin-left w3-leftbar" style="margin:0 -16px">
       <div class="w3-third w3-padding-16">
         <h5>Field Description</h5>
@@ -166,27 +174,29 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       </div>
     </div>
   </div>
-  <br>
+  <br>-->
+
   <div class="w3-container w3-dark-grey w3-padding-32">
     <div class="w3-row">
       <div class="w3-container w3-third">
         <h5 class="w3-bottombar w3-border-green">Contributers</h5>
-        <p>Aman Singh</p>
-        <p>Rica Ghosh</p>
-        <p>Deepak Yadu</p>
-        <p>Khyati banjare</p>
-        <p>Arwind</p>
+        <h6>Nguyên</h6>
+        <h6>Trường</h6>
+        <h6>Hải</h6>
+        <h6>Đức</h6>
       </div>
       <div class="w3-container w3-third">
         <h5 class="w3-bottombar w3-border-red">Guides</h5>
-        <p>All faculties Of BIT Raipur</p>
+        <h6>Thầy ...</h6>
       </div>
       <div class="w3-container w3-third">
         <h5 class="w3-bottombar w3-border-orange">References</h5>
-        <p>Google.com</p>
+        <h6>Google đi bạn</h6>
       </div>
     </div>
   </div>
+
+</div>
 
 </div>
 
@@ -216,6 +226,7 @@ function w3_close() {
 </script>
 
 <script src="/static/JS/main.js"> </script>
+<script src="/static/JS/device.js"></script>
 
 </body>
 </html>
