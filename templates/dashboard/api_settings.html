@@ -1,0 +1,43 @@
+{% extends "/base/dashboard.html" %}
+
+{% block header %}
+ <!-- Header -->
+<header class="w3-container" style="padding-top:22px">
+  <h5><b> API Settings</b></h5>
+</header>
+{% endblock header %}
+ 
+{% block content %}
+<div class="w3-container w3-white w3-margin w3-card-4 w3-padding">
+  <br>
+  <button class="w3-black w3-hover-green w3-button"> Generate API key</button>
+  <table>
+  <tr >
+    <td >
+      <h3 id="apikey_holder" class="w3-text-grey w3-border w3-padding">XXXX XXXX XXXX XXXX XXXX </h3>
+    </td>
+    <td style="padding: 40px;">
+      <input type="button" value="Show" id="tooglebtn" onclick="show_hide()" class="w3-button w3-teal w3-hover-black" >
+    </input>
+    </td>
+  </tr>  
+  </table>
+  <script>
+
+    document.getElementById("apikey_holder").innerHTML = "XXXX XXXX XXXX XXXX XXXX";
+    
+    function show_hide(){
+      var x = document.getElementById("apikey_holder");
+      var btn = document.getElementById("togglebtn");
+      var actual_key = document.getElementById('apikey').value;
+      
+      if (x.innerHTML === "XXXX XXXX XXXX XXXX XXXX") {
+        x.innerHTML = actual_key;
+      } else {
+        x.innerHTML = "XXXX XXXX XXXX XXXX XXXX";
+      }
+    }
+    </script>
+</div>
+<script src="/static/JS/main.js"> </script>
+{% endblock content %}  

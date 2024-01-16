@@ -50,34 +50,34 @@ class db:
         except Exception as e:
             print(e)
 
-    def update_values(self, apikey, fieldname, deviceID, temp, humidity, moisture, light):
-        try:
-            # Check if API key exists
-            apikeys = self.get_apikeys()
-            if apikey not in apikeys:
-                print("API key not found.")
-                return
+    # def update_values(self, apikey, fieldname, deviceID, temp, humidity, moisture, light):
+    #     try:
+    #         # Check if API key exists
+    #         apikeys = self.get_apikeys()
+    #         if apikey not in apikeys:
+    #             print("API key not found.")
+    #             return
 
-            # Insert data into the specified table
-            query = f"""
-                INSERT INTO {fieldname} (deviceID, temperature, humidity, moisture, light, date_time)
-                VALUES (%s, %s, %s, %s, %s, NOW())
-            """
-            self.cursor.execute(query, (deviceID, temp, humidity, moisture, light))
+    #         # Insert data into the specified table
+    #         query = f"""
+    #             INSERT INTO {fieldname} (deviceID, temperature, humidity, moisture, light, date_time)
+    #             VALUES (%s, %s, %s, %s, %s, NOW())
+    #         """
+    #         self.cursor.execute(query, (deviceID, temp, humidity, moisture, light))
 
-            # Update the Node table
-            query = f"""
-                UPDATE Node
-                SET temperature=%s, humidity=%s, moisture=%s, light=%s
-                WHERE deviceID=%s
-            """
-            self.cursor.execute(query, (temp, humidity, moisture, light, deviceID))
+    #         # Update the Node table
+    #         query = f"""
+    #             UPDATE Node
+    #             SET temperature=%s, humidity=%s, moisture=%s, light=%s
+    #             WHERE deviceID=%s
+    #         """
+    #         self.cursor.execute(query, (temp, humidity, moisture, light, deviceID))
 
-            self.db.commit()
-            return True
+    #         self.db.commit()
+    #         return True
 
-        except Exception as e:
-            print(f"[ERROR!] {e}")
+    #     except Exception as e:
+    #         print(f"[ERROR!] {e}")
 
 
 # # Example usage

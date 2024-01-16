@@ -1,0 +1,23 @@
+{% extends "/base/dashboard.html" %}
+
+{% block title %}Overview{% endblock %}
+
+{% block content %}
+<div class="w3-panel w3-padding-large">
+<div class="w3-container w3-white w3-card w3-hover-shadow w3-section w3-round-large">
+  <h3>
+    Temperature
+  </h3> 
+  <canvas id="temperature" ></canvas>
+  </div>
+
+  
+  <div class="w3-container w3-white w3-card w3-hover-shadow w3-section w3-round-large">
+    <h3>
+      Humidity
+    </h3> 
+    <canvas id="humidity" ></canvas>
+  </div>
+  
+{% endblock content %}
+  

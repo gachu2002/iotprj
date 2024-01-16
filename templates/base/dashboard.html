@@ -9,14 +9,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- <meta http-equiv="refresh" content="5" > -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
-  <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
   
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/static/css/main.css">
 <link rel="stylesheet" href="/static/css/util.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js" integrity="sha256-8zyeSXm+yTvzUN1VgAOinFgaVFEFTyYzWShOy9w7WoQ=" crossorigin="anonymous"></script>
 
 <style>
 html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
@@ -27,6 +27,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
   <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
   <span class="w3-bar-item w3-right">ARMS</span>
+  <input type="hidden" id="apikey" value="{{ user.api }}">
 </div>
 
 <!-- Sidebar/menu -->
@@ -48,9 +49,9 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   </div>
   <div class="w3-bar-block">
     <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-white w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
-    <a href="/overview/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Overview</a>
+    <a href="/overview/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-users fa-fw"></i>  Overview</a>
 
-    <a href="/devices/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding w3-blue"> <img src="/static/images/bio-sensor.svg"> Devices</a>
+    <a href="/devices/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding"> <img src="/static/images/bio-sensor.svg"> Devices</a>
 
     <!-- <a href="#" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i>  Field device Controls</a> -->
     <a href="/apisettings/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  API settings</a>
@@ -58,8 +59,6 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     <a href="/profile/{{ user.username }}/{{ user.session }}" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Profile Settings</a><br><br>
   </div>
 </nav>
-
-
 <!-- Overlay effect when opening sidebar on small screens -->
 <div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
 
@@ -70,13 +69,13 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <header class="w3-container" style="padding-top:22px">
     <h5><b><i class="fa fa-dashboard"></i> My Dashboard</b></h5>
   </header>
-
+  {% block header %}
   <div class="w3-row-padding w3-margin-bottom">
     <div class="w3-quarter">
       <div class="w3-container w3-white w3-hover-shadow w3-border-red w3-bottombar w3-padding-16">
         <div class="w3-left"><img src="/static/images/temperature.svg"></div>
         <div class="w3-right">
-          <h3>52</h3>
+          <h3  id = "card-temp">52</h3>
         </div>
         <div class="w3-clear"></div>
         <h4>Temperature</h4>
@@ -86,7 +85,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       <div class="w3-container w3-white w3-hover-shadow w3-border-blue w3-bottombar w3-padding-16">
         <div class="w3-left"><img src="/static/images/grass.svg"></div>
         <div class="w3-right">
-          <h3>99</h3>
+          <h3 id = "card-moisture">99</h3>
         </div>
         <div class="w3-clear"></div>
         <h4>Moisture</h4>
@@ -96,7 +95,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       <div class="w3-container w3-white w3-hover-shadow w3-border-teal w3-bottombar w3-padding-16">
         <div class="w3-left"><img src="/static/images/humidity.svg"></div>
         <div class="w3-right">
-          <h3>23</h3>
+          <h3 id ="card-humidity">23</h3>
         </div>
         <div class="w3-clear"></div>
         <h4>Humidity</h4>
@@ -106,59 +105,20 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       <div class="w3-container w3-white w3-hover-shadow w3-border-orange w3-bottombar w3-padding-16">
         <div class="w3-left"><img src="/static/images/ecology.svg"></div>
         <div class="w3-right">
-          <h3>50</h3>
+          <h3 id = "card-light">50</h3>
         </div>
         <div class="w3-clear"></div>
         <h4>Light Intensity</h4>
       </div>
     </div>
   </div>
-
-  <!-- List of Devices -->
-  <div class = "w3-container w3-responsive">
-    <div class = "w3-panel w3-white">
-      <div>
-        <div class = "w3-panel w3-container">
-          <div class = "w3-left fs-30 w3-bold-large">Devices detail</div>
-          <div class="w3-right">
-            <div class="form-outline w3-round-xxlarge w3-border ">
-              <div class = "p-l-5 p-r-5 p-t-8 p-b-8 fs-17">
-                <button type="button" class="btn btn-primary w3-align-left m-l-5 m-r-5">
-                  <i class="fa fa-search"></i>
-                </button>
-                <input type="text" id="form1" onkeyup = "filterDevices()" class="form-control" placeholder = "Search"/>
-              </div>
-            </div>   
-          </div>
-        </div>
-        
-        <table class = "w3-table-all w3-card-4 w3-panel m-b-30">
-            <tr class = "w3-bold">
-              <th>#</th>
-              <th>Name</th>
-              <th>Type of Device</th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-
-            {% for device in devices %}
-            <tr>
-              <td>{{device.deviceID}}</td>
-              <td>{{device.deviceID}}</td>
-              <td>{{device.deviceID}}</td>
-              <td>{{device.deviceID}}</td>
-              <td>
-                
-              </td>
-            </tr>
-            {% endfor %}
-        </table>
-      </div>
-    </div>
-  </div>
+  {% endblock header %}
   
 
-  <!--<div class="w3-panel w3-padding-16">
+  {% block content %}{% endblock content %}
+  
+
+  <div class="w3-panel w3-padding-16">
     <div class="w3-row-padding w3-white w3-border-green w3-margin-left w3-leftbar" style="margin:0 -16px">
       <div class="w3-third w3-padding-16">
         <h5>Field Description</h5>
@@ -174,8 +134,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       </div>
     </div>
   </div>
-  <br>-->
-
+  <br>
   <div class="w3-container w3-dark-grey w3-padding-32">
     <div class="w3-row">
       <div class="w3-container w3-third">
@@ -195,8 +154,6 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       </div>
     </div>
   </div>
-
-</div>
 
 </div>
 
@@ -225,8 +182,7 @@ function w3_close() {
 }
 </script>
 
-<script src="/static/JS/main.js"> </script>
-<script src="/static/JS/device.js"></script>
+<script src="/static/JS/chart_data.js"> </script>
 
 </body>
 </html>

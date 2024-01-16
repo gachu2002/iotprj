@@ -1,0 +1,183 @@
+{% extends "/base/dashboard.html" %}
+
+{% block title %}Device{% endblock %}
+
+{% block header %}
+<link rel="stylesheet" href="/static/css/device.css">
+<div class="w3-row-padding w3-margin-bottom" hx-boosting = "true">
+  <div class="w3-col s6 m5 l3">
+    <div class="w3-container w3-white w3-hover-shadow w3-border-red w3-bottombar w3-padding-16">
+      <div class="w3-left"><img src="/static/images/temperature.svg"></div>
+      <div class="w3-right">
+        <h3>{{sensor_count}}</h3>
+      </div>
+      <div class="w3-clear"></div>
+      <h4>Number of Sensors</h4>
+    </div>
+  </div>
+  <div class="w3-col s6 m5 l3">
+    <div class="w3-container w3-white w3-hover-shadow w3-border-yellow w3-bottombar p-t-20 p-b-22">
+      <div class="w3-left"><img src="/static/images/ecology.svg"></div>
+      <div class="w3-right">
+        <h3>{{led_count}}</h3>
+      </div>
+      <div class="w3-clear"></div>
+      <h4>Number of Leds</h4>
+    </div>
+  </div>
+</div>
+{% endblock header %}
+  
+{% block content %}
+<!-- List of Devices -->
+<div class = "w3-container w3-responsive">
+  <div class = "w3-panel">
+    <!-- The header for the list of devices -->
+    <div class = "w3-white w3-border-bottom w3-border-light-grey w3-padding-16">
+      <div class = "w3-panel w3-container">
+        <div class = "w3-left fs-38 w3-bold-large">Devices detail</div>
+        <!-- The search bar -->
+        <div class="w3-right">
+          <div class="form-outline w3-round-xxlarge w3-border ">
+            <div class = "p-l-5 p-r-5 p-t-8 p-b-8 fs-17">
+              <button type="button" class="btn btn-primary w3-align-left m-l-5 m-r-5">
+                <i class="fa fa-search"></i>
+              </button>
+              <input type="text" id="form1" onkeyup = "filterDevices()" class="form-control" placeholder = "Search"/>
+            </div>
+          </div>   
+        </div>
+      </div>
+    </div>
+    <!-- End of the header for the list of devices -->
+
+    <!-- The body for list of devices-->
+    <div class = "w3-panel">
+      <!-- List of sensors -->
+      <div class = "w3-row-padding">
+        <div class = "w3-white fs-30 w3-bold-large w3-container w3-border-grey m-t-30">Sensors</div>
+        {% for device in devices %}
+        {% if device.device_type == 'sensor'%}
+        <div class = "w3-half sensor">
+          <div class = "w3-white w3-panel m-b-50 m-t-30 p-b-16 p-t-20 w3-hover-shadow w3-border w3-border-light-grey w3-round-large">
+            <div class = "w3-card w3-quarter w3-container w3-white w3-hover-shadow w3-border-red w3-bottombar p-b-16 p-t-20 m-r-20">
+              <div class="w3-left"><img src="/static/images/temperature.svg"></div>
+              <div class="w3-left fs-25">{{device.device_value}}</div>
+              <div class="w3-clear"></div>
+              <div class="fs-16 w3-bold">Temparature</div>
+            </div>
+            <div class = "w3-card w3-quarter w3-container w3-white w3-hover-shadow w3-border-teal w3-bottombar p-b-22 p-t-20">
+            <div class="w3-left"><img src="/static/images/humidity.svg"></div>
+            <div class="w3-left fs-25">{{device.device_value}}</div>
+            <div class="w3-clear"></div>
+            <div class="fs-16 w3-bold">Humidity</div>
+            </div>
+            <div class ="w3-rest w3-container fs-20 m-f w3-center">DeviceID: {{device.deviceID}}</div>
+            <button onclick="document.getElementById('{{device.deviceID}}').style.display='block'" class ="w3-hover-shadow w3-third w3-container fs-16 w3-amber w3-round-xxlarge m-l-28 m-t-5 m-b-5">See info</button>
+            <div id="{{device.deviceID}}" class="w3-modal">
+              <div class="w3-col l3 w3-modal-content w3-card-4 w3-display-middle w3-round">
+                <header class="w3-container w3-pink w3-round "> 
+                  <span onclick="document.getElementById('{{device.deviceID}}').style.display='none'" 
+                  class="w3-button w3-display-topright">&times;</span>
+                  <h2>DEVICE INFO</h2>
+                </header>
+                <table class="w3-table">
+                  <tr class="w3-bold">
+                    <th>Field</th>
+                    <th>Value</th>
+                  </tr>
+                  <tr>
+                    <td>Device ID:</td>
+                    <td>{{device.deviceID}}</td>
+                  </tr>
+                  <tr>
+                    <td>Username:</td>
+                    <td>{{user.username}}</td>
+                  </tr>
+                  <tr>
+                    <td>Device type:</td>
+                    <td>{{device.device_type}}</td>
+                  </tr>
+                  <tr>
+                    <td>Device value:</td>
+                    <td>{{device.device_value}}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <button hx-put = "/devices/{{device.deviceID}}/edit/{{user.username}}/{{user.session}}" class ="w3-hover-shadow w3-third w3-container fs-16 w3-light-green w3-round-xxlarge m-l-28 m-t-5 m-b-5">Edit</button>
+            <button hx-confirm = "U sure?" hx-delete = "/devices/{{device.deviceID}}/delete/{{user.username}}/{{user.session}}" hx-target = "closest .sensor" hx-swap = "outerHTML swap:1s" class ="w3-hover-shadow w3-third w3-container fs-16 w3-pink w3-round-xxlarge m-l-28 m-t-5 m-b-5">Delete</button>
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      <!-- End of list of sensors -->
+
+      <!-- list of Leds -->
+      <div class = "w3-row-padding w3-margin-top">
+        <div class = "w3-white fs-30 w3-bold-large w3-container w3-border-grey m-t-30">Leds</div>
+        {% for device in devices %}
+        {% if device.device_type == 'led'%}
+        <div class="w3-col l4 m6 s12 led">
+          <div class = "w3-white m-b-50 m-t-30 w3-border w3-border-light-grey w3-hover-shadow w3-round-large">
+            <div class = "w3-panel">
+              <div class = "w3-cell w3-card w3-col l4 w3-container w3-white w3-hover-shadow w3-border-yellow w3-bottombar p-t-20 m-r-20">
+                <div class="w3-left"><img src="/static/images/ecology.svg"></div>
+                <div class="fs-25 w3-bold ">Led</div>
+                <div class="w3-clear"></div>
+              </div>
+              <div class = "w3-cell">
+                <div class ="w3-container fs-20 m-f w3-center">DeviceID: {{device.deviceID}}</div>
+                <button onclick="document.getElementById('{{device.deviceID}}').style.display='block'" class ="w3-hover-shadow w3-col l7 w3-container fs-16 w3-amber w3-round-xxlarge m-l-28 m-t-5 m-b-5">See info</button>
+                <div id="{{device.deviceID}}" class="w3-modal">
+                  <div class="w3-col l3 w3-modal-content w3-card-4 w3-display-middle w3-round">
+                    <header class="w3-container w3-pink w3-round "> 
+                      <span onclick="document.getElementById('{{device.deviceID}}').style.display='none'" 
+                      class="w3-button w3-display-topright">&times;</span>
+                      <h2>DEVICE INFO</h2>
+                    </header>
+                    <table class="w3-table">
+                      <tr class="w3-bold">
+                        <th>Field</th>
+                        <th>Value</th>
+                      </tr>
+                      <tr>
+                        <td>Device ID:</td>
+                        <td>{{device.deviceID}}</td>
+                      </tr>
+                      <tr>
+                        <td>Username:</td>
+                        <td>{{user.username}}</td>
+                      </tr>
+                      <tr>
+                        <td>Device type:</td>
+                        <td>{{device.device_type}}</td>
+                      </tr>
+                      <tr>
+                        <td>Device value:</td>
+                        <td>{{device.device_value}}</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+                <button class ="w3-hover-shadow w3-col l7 w3-container fs-16 w3-light-green w3-round-xxlarge m-l-28 m-t-5 m-b-5">Edit</button>
+                <button hx-confirm = "U sure?" hx-delete = "/devices/{{device.deviceID}}/delete/{{user.username}}/{{user.session}}" hx-target = "closest .led" hx-swap = "outerHTML swap:1s" class ="w3-hover-shadow w3-col l7 w3-container fs-16 w3-pink w3-round-xxlarge m-l-28 m-t-5 m-b-5">Delete</button>
+
+                </style>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>  
+</div>
+<script src="/static/vendor/htmx/htmx.min.js"></script>
+{% endblock content %} 
+
+
+
