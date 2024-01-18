@@ -13,6 +13,7 @@ class user:
         self.auth()
         self.get_details()
         self.get_devices()
+        self.get_addable_device()
         
     def auth (self):
         #this is the place where user will get authenticated
@@ -209,36 +210,36 @@ class user:
             print(e)
             return False
             
-    def update_device_info(self, deviceID, device_type, device_value, register):
-        """
-        Update the device information in the devices table.
+    # def update_device_info(self, deviceID, device_type, device_value, register):
+    #     """
+    #     Update the device information in the devices table.
 
-        :param deviceID: The ID of the device to update.
-        :param device_type: The new type of the device.
-        :param device_value: The new value of the device.
-        :return: True if the update was successful, False otherwise.
-        """
-        try:
-            if self.authenticated:
-                # Prepare the SQL query to update the device information
-                query = """
-                    UPDATE devices
-                    SET device_type = %s, device_value = %s, register = %s
-                    WHERE deviceID = %s AND username = %ss
-                """
-                # Execute the query with the provided parameters
-                self.db.cursor.execute(query, (device_type, device_value, register, deviceID, self.username))
-                # Commit the changes to the database
-                self.db.commit()
-                print(f"Device {deviceID} updated successfully.")
-                return True
-            else:
-                print("User not logged in!")
-                return False
-        except Exception as e:
-            print("[ERROR!]")
-            print(e)
-            return False
+    #     :param deviceID: The ID of the device to update.
+    #     :param device_type: The new type of the device.
+    #     :param device_value: The new value of the device.
+    #     :return: True if the update was successful, False otherwise.
+    #     """
+    #     try:
+    #         if self.authenticated:
+    #             # Prepare the SQL query to update the device information
+    #             query = """
+    #                 UPDATE devices
+    #                 SET device_type = %s, device_value = %s, register = %s
+    #                 WHERE deviceID = %s AND username = %ss
+    #             """
+    #             # Execute the query with the provided parameters
+    #             self.db.cursor.execute(query, (device_type, device_value, register, deviceID, self.username))
+    #             # Commit the changes to the database
+    #             self.db.commit()
+    #             print(f"Device {deviceID} updated successfully.")
+    #             return True
+    #         else:
+    #             print("User not logged in!")
+    #             return False
+    #     except Exception as e:
+    #         print("[ERROR!]")
+    #         print(e)
+    #         return False
 
     def disable_device(self, deviceID):
         try:
@@ -304,10 +305,10 @@ class user:
     #         print(e)
 
 #testing side for the class
-test = user("amansingh", "password here")
-test.get_details()
-print(test.get_devices())
-print(test.get_addable_device())
+# test = user("amansingh", "password here")
+# test.get_details()
+# print(test.get_devices())
+# print(test.get_addable_device())
 # print(test.dev_info("ARMS1112"))
 # print(test.field_values('Rosegarden'))
 # print(test.device_values("Rosegarden", "ARMS12012"))

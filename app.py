@@ -4,47 +4,26 @@ from random import choice
 from datetime import datetime
 import person
 import os, binascii
-from flask import Flask, render_template
-import paho.mqtt.client as mqtt
-import json
+from flask_mqtt import Mqtt
 
 app = Flask(__name__)
+
 app.config['SECRET_KEY'] = 'gfgfgghghgfhgfhgfhgfhfgghghghghghg'
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 logged_in = {}
 api_loggers = {}
-# mydb = database.db('root', 'Localhost', 'Love123bgbg@', 'ARMS')
+mydb = database.db('root', 'Localhost', 'Love123bgbg@', 'ARMS')
 
-app = Flask(__name__)
-
-mqtt_broker = "broker.hivemq.com"
-mqtt_port = 1883
-mqtt_topic_device = "device"
-mqtt_topic_command = "command"
-
-# Create MQTT client
-mqtt_client = mqtt.Client()
-
-    
-
+app.config['MQTT_BROKER_URL'] = 'broker.hivemq.com'
+app.config['MQTT_BROKER_PORT'] = 1883
+app.config['MQTT_REFRESH_TIME'] = 0.5
+mqtt = Mqtt(app)
 #test api key aGFja2luZ2lzYWNyaW1lYXNmc2FmZnNhZnNhZmZzYQ==
+# ROUTING FOR TEMPALTE
 #this link is for the main dashboard of the website
 @app.route('/', methods=['GET', 'POST'])
 def home():
     return render_template('home.html', title='HOME - Landing Page')
-
-@app.route("/login", methods=['GET', 'POST'])
-def login():
-    error = ""
-    if request.method == 'POST':
-        user = person.user(request.form['username'], request.form['password'])
-        if user.authenticated:
-            user.session_id = str(binascii.b2a_hex(os.urandom(15)))
-            logged_in[user.username] = {"object": user}
-            return redirect('/overview/{}/{}'.format(request.form['username'], user.session_id))
-        else:
-            error = "invalid Username or Passowrd"
-       
-    return render_template('authentication/Login.html', error=error)
 
 #register
 @app.route("/register", methods=['GET', 'POST'])
@@ -81,7 +60,47 @@ def register():
 
     return render_template('authentication/register.html', error=error)   
 
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    error = ""
+    if request.method == 'POST': 
+        
+        user = person.user(request.form['username'], request.form['password'])
+        if user.authenticated:
+            user.session_id = str(binascii.b2a_hex(os.urandom(15)))
+            logged_in[user.username] = {"object": user}
+            return redirect('/overview/{}/{}'.format(request.form['username'], user.session_id))
+        else:
+            error = "invalid Username or Passowrd"
+       
+    return render_template('authentication/Login.html', error=error)
 
+# MQTT message handling function
+@mqtt.on_connect()
+def handle_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+    mqtt.subscribe('device')
+    
+@mqtt.on_message()
+def handle_message(client, userdata, message):
+    data = json.loads(message.payload)
+    for username in logged_in:
+        print(username)
+        if(data.get('deviceType') == "sensor"):
+            deviceID = data.get('deviceId')
+            device_type = data.get('deviceType')
+            device_value = f"{data.get('temp')} {data.get('humid')}"
+        else:
+            deviceID = data.get('deviceId')
+            device_type = data.get('deviceType')
+            device_value = data.get('deviceValue')
+        # Add or update the device in the database
+        result = mydb.add_device(username, deviceID, device_type, device_value)
+        print(result)
+    data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    
+    
 @app.route('/overview/<string:username>/<string:session>', methods=['GET', 'POST'])
 def overview(username, session):
     
@@ -94,13 +113,7 @@ def overview(username, session):
             "api": logged_in[username]["object"].api,
             "session" : session
         }
-
-        devices = [
-            {"Dashboard" : "device1",
-            "deviceID": "Device1"
-            }
-        ]
-        return render_template('dashboard/overview.html', title='Overview', user=user, devices=devices)
+        return render_template('dashboard/overview.html', title='Overview', user=user)
     
     else:
         return redirect('/login')
@@ -143,12 +156,7 @@ def profile(username, session):
             "lastlogin":logged_in[username]["object"].last_login,
         }
 
-        devices = [
-            {"Dashboard" : "device1",
-            "deviceID": "device1"
-            }
-        ]
-        return render_template('dashboard/profile.html', title='API-Settings', user=user, devices=devices)
+        return render_template('dashboard/profile.html', title='API-Settings', user=user)
     
     else:
         return redirect('/login')
@@ -169,7 +177,7 @@ def logout(username, session):
 
 #this links is for devices
 @app.route('/devices/<string:username>/<string:session>', methods=["GET", "POST"])
-def Dashoboard(username, session):
+def Dashboard(username, session):
     global logged_in
     
     if username in logged_in and (logged_in[username]['object'].session_id == session):
@@ -205,25 +213,42 @@ def get_device_info(username, session, deviceID):
     else:
         return redirect('/login')
 
-@app.route('/devices/<string:deviceID>/add/<string:username>/<string:session>',methods = ["POST"])
-def add_device(username, session, deviceID):
+@app.route('/devices/add/<string:username>/<string:session>',methods = ["GET"])
+def see_unabled_device(username, session):
     global logged_in
     
     if username in logged_in and (logged_in[username]['object'].session_id == session):
-        device = logged_in[username]["object"].enable_device(deviceID)
-        return jsonify(device)
+        user = {
+            "username" : username,
+            "image":"/static/images/amanSingh.jpg", 
+            "api": logged_in[username]["object"].api,
+            "session" : session
+        }
+        addable_devices = logged_in[username]["object"].get_addable_device()
+        return render_template('dashboard/add_device.html', title='Device Add', addable_devices = addable_devices, user = user)
+    else:
+        return redirect('/login')
+
+@app.route('/devices/<string:deviceID>/add/<string:username>/<string:session>',methods = ["POST"])
+def add_unabled_device(username, session):
+    global logged_in
+    
+    if username in logged_in and (logged_in[username]['object'].session_id == session):
+        deviceID = request.form['deviceID']
+        logged_in[username]["object"].enable_device(deviceID)
+        return redirect('/devices/<string:username>/<string:session>')
     else:
         return redirect('/login')
     
-# @app.route('/devices/<string:deviceID>/edit/<string:username>/<string:session>',methods = ["PUT"])
-# def edit_device_info(username, session, deviceID):
-#     global logged_in
+@app.route('/devices/<string:deviceID>/edit/<string:username>/<string:session>',methods = ["PUT"])
+def edit_device_info(username, session, deviceID):
+    global logged_in
 
-#     if username in logged_in and (logged_in[username]['object'].session_id == session):
-#         device = logged_in[username]["object"].update_device_info(deviceID)
-#         return jsonify(device)
-#     else:
-#         return redirect('/login')
+    if username in logged_in and (logged_in[username]['object'].session_id == session):
+        device = logged_in[username]["object"].update_device_info(deviceID)
+        return jsonify(device)
+    else:
+        return redirect('/login')
     
 @app.route('/devices/<string:deviceID>/delete/<string:username>/<string:session>', methods = ["DELETE"])
 def delete_device(username, session, deviceID):
@@ -234,37 +259,15 @@ def delete_device(username, session, deviceID):
         return ""
     else:
         return redirect('/login')
-    
-    
-def on_message(client, userdata, msg):
-    # Handle incoming messages from devices
-    payload = json.loads(msg.payload)
-    device_id = payload.get('deviceId')  # Assuming the device ID is included in the payload
-    if not device_id:
-        return  # Device ID is required for further processing
 
-    # Check if the device exists for any logged-in user
-    for username in logged_in.items():
-        if person.user.check_device_exists(username, device_id):
-            break
-        else:
-            if payload['deviceType'] == 'led':
-                person.user.add_device(username, device_id, payload['deviceType'], payload['deviceStatus'])
-            else:
-                person.user.add_device(username, device_id, payload['deviceType'], payload['temp'])
-    # Add your logic here to handle incoming device messages
     
-# Set up MQTT client callbacks
-mqtt_client.on_message = on_message
-
-
 # #this is the testing for api 
 # @app.route("/api/<string:apikey>/test", methods=["GET", "POST"])
 # def apitest (apikey):
 #     return {"data":"working Fine Connected to the api server"}
 
 
-# #get all the devices information from the user
+#get all the devices information from the usser
 # @app.route("/api/<string:apikey>/listdevices", methods=['GET', 'POST'])
 # def listdevices(apikey):
 #     global api_loggers
@@ -306,7 +309,6 @@ mqtt_client.on_message = on_message
 #             api_loggers[apikey] = {"object" : apiuser}
 #             #this part is hard coded so remove after fixing the issue
 #             data = list(data)
-#             data[2] = "Rosegarden"
 #             return jsonify(data)
 #         except Exception as e:
 #             print (e)
@@ -315,9 +317,7 @@ mqtt_client.on_message = on_message
 #     else:
 #         data = api_loggers[apikey]["object"].dev_info(deviceID)
 
-#         #this part is hard coded so remove after fixing the issue
 #         data = list(data)
-#         data[2] = "Rosegarden"
 #         return jsonify (data)
 
 # @app.route('/api/<string:apikey>/fieldstat/<string:fieldname>', methods=['GET', 'POST'])
@@ -447,7 +447,4 @@ mqtt_client.on_message = on_message
 
 
 if __name__ == "__main__":
-    mqtt_client.connect(mqtt_broker, mqtt_port, 60)
-    mqtt_client.subscribe(mqtt_topic_device)
-    mqtt_client.loop_start()  # Start the MQTT loop in a separate thread
     app.run(host="0.0.0.0", port = "80", debug=True)

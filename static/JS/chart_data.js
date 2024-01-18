@@ -2,7 +2,7 @@ var temperature = document.getElementById('temperature');
 var apikey = document.getElementById('apikey').value ;
 var devicename = "ARMS12012";
 function getdevice(){
-    var requests = $.get('/');
+    var requests = $.get('/api/' + apikey + '/deviceinfo/' + devicename);
     
     var tm = requests.done(function (result){
         var today = new Date();
@@ -25,6 +25,7 @@ function getdevice(){
 }
 
 //temperature chart object created 
+var humidity = document.getElementById('temparature');
 var temp_chart = new Chart(temperature, {
     type: 'line',
     data: {

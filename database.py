@@ -49,7 +49,69 @@ class db:
             return "success"
         except Exception as e:
             print(e)
+            
+    def add_device(self, username, deviceID, device_type, device_value):
+        try:
+            # Check if a device with the same deviceID and username already exists
+            query = """
+                SELECT * FROM devices WHERE deviceID = %s AND username = %s
+            """
+            self.cursor.execute(query, (deviceID, username))
+            existing_device = self.cursor.fetchone()
+            
+            if existing_device:
+                # Device exists, update its information
+                query = """
+                    UPDATE devices
+                    SET device_type = %s, device_value = %s
+                    WHERE username = %s AND deviceID = %s
+                """
+                self.cursor.execute(query, (device_type, device_value, username, deviceID))
+                self.db.commit()
+                db.update_statistic(self, deviceID, device_type, device_value)
+                return "updated"
+            else:
+                # Insert the new device since it does not exist
+                query = """
+                    INSERT INTO devices (username, deviceID, device_type, device_value, register)
+                    VALUES (%s, %s, %s, %s, %s)
+                """
+                self.cursor.execute(query, (username, deviceID, device_type, device_value, 'no'))
+                self.db.commit()
+                db.update_statistic(self, deviceID, device_type, device_value)  
+                return "success"
+        except Exception as e:
+            print(e)
+            return "error"
+    
+    def update_statistic(self, deviceID, device_type, device_value):
+        try:
+            # Validate that the device_type is a valid column
+            if device_type == "sensor":
+                temp, humid = device_value.split()
+                # Prepare the SQL query to update the statistics table
+                query = f"""
+                    INSERT INTO statistics (deviceID, temp, humid, record_time)
+                    VALUES (%s, %s, %s, NOW())
+                    ON DUPLICATE KEY UPDATE
+                    record_time = NOW()
+                """
 
+                # Execute the SQL query
+                self.cursor.execute(query, (deviceID, temp, humid))
+
+                # Commit the changes to the database
+                self.db.commit()
+
+                # Return a success message or boolean
+                return True
+
+        except Exception as e:
+            # Print the error and return False or an error message
+            print(f"[ERROR!] {e}")
+            return False
+
+        
     # def update_values(self, apikey, fieldname, deviceID, temp, humidity, moisture, light):
     #     try:
     #         # Check if API key exists
@@ -80,9 +142,13 @@ class db:
     #         print(f"[ERROR!] {e}")
 
 
-# # Example usage
-# with db('aman', '192.168.56.102', 'hacker123', 'ARMS') as mydb:
-
+# # # Example usage
+# with db('root', 'localhost', 'Love123bgbg@', 'ARMS') as mydb:
+#     result = mydb.add_device('amansingh', 'nahidegi', 'led', 'on')
+# # Get all API keys
+#     apikeys = mydb.get_apikeys()
+#     print(f"API keys: {apikeys}")
+    
 #     # Get user data
 #     user_data = mydb.user('nahidegi', '123456')
 #     print(f"User data: {json.dumps(user_data)}")

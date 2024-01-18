@@ -1,0 +1,31 @@
+{% extends "/base/authen.html" %}
+
+{% block title %}Add Device{% endblock %}
+  
+{% block content %}
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<div class="limiter">
+	<div class="container-login100">
+			<div class="login400 validate-form">
+                <table class = "w3-table-all w3-card-4 w3-centered w3-hoverable">
+                    <tr>
+                        <th>DeviceID</th>
+                        <th>Device Type</th>
+                        <th>Action</th>
+                    </tr>
+                    {% for device in addable_devices %}          
+                    <tr>   
+                        <form hx-post="/devices/{{device.deviceID}}/add/{{user.username}}/{{user.session}}">      
+                        <td><input type="hidden" name="{{device.deviceID}}">{{device.deviceID}}</td>
+                        <td>{{device.device_type}}</td>  
+                        <td>
+                            <button class = "w3-button w3-teal" style = "width: 100%" type="submit">Add</button>
+                        </td> 
+                        </form>  
+                    </tr>   
+                    {% endfor %}
+                </table>
+			</div>
+	</div>
+</div>
+{% endblock content %}

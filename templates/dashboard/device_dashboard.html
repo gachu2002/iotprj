@@ -9,7 +9,7 @@
     <div class="w3-container w3-white w3-hover-shadow w3-border-red w3-bottombar w3-padding-16">
       <div class="w3-left"><img src="/static/images/temperature.svg"></div>
       <div class="w3-right">
-        <h3>{{sensor_count}}</h3>
+        <h3 x-data="{ sensor_count: 0 }">{{sensor_count}}</h3>
       </div>
       <div class="w3-clear"></div>
       <h4>Number of Sensors</h4>
@@ -48,6 +48,10 @@
           </div>   
         </div>
       </div>
+      <div class = "w3-row">
+        <a href = "/devices/add/{{ user.username }}/{{user.session}}"> <button class ="w3-hover-shadow w3-fourth w3-container fs-16 w3-light-blue w3-round-xxlarge m-l-15 p-t-6 p-b-6">Add Device</button></a>
+      </div>
+      
     </div>
     <!-- End of the header for the list of devices -->
 
@@ -132,7 +136,7 @@
                 <button onclick="document.getElementById('{{device.deviceID}}').style.display='block'" class ="w3-hover-shadow w3-col l7 w3-container fs-16 w3-amber w3-round-xxlarge m-l-28 m-t-5 m-b-5">See info</button>
                 <div id="{{device.deviceID}}" class="w3-modal">
                   <div class="w3-col l3 w3-modal-content w3-card-4 w3-display-middle w3-round">
-                    <header class="w3-container w3-pink w3-round "> 
+                    <header class="w3-container w3-blue w3-round "> 
                       <span onclick="document.getElementById('{{device.deviceID}}').style.display='none'" 
                       class="w3-button w3-display-topright">&times;</span>
                       <h2>DEVICE INFO</h2>
@@ -176,6 +180,7 @@
 
   </div>  
 </div>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="/static/vendor/htmx/htmx.min.js"></script>
 {% endblock content %} 
 
